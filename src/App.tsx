@@ -13,6 +13,59 @@ import { loadConfig } from "@/lib/config"
 // week for anonymous callers.
 type Me = { authed: boolean; github: boolean; site_name: string; public_page: boolean; history_days?: number }
 
+type SensorData = Record<string, number | string>
+
+function formatSensor(data: SensorData): string {
+  return Object.entries(data)
+    .map(([key, val]) => {
+      const num = typeof val === "number" ? val.toFixed(1) : val
+      const unit = key.includes("湿度") ? "%" : "℃"
+      return `${key}:${num}${unit}`
+    })
+    .join(" | ")
+}
+
+function SensorBar() {
+  const [data, setData] = useState<SensorData | null>(null)
+
+  useEffect(() => {
+    let active = true
+    const load = async () => {
+      for (const path of ["/sensor", "/sensor.json"]) {
+        try {
+          const res = await fetch(`${path}?_=${Date.now()}`)
+          if (!res.ok) continue
+          const contentType = res.headers.get("content-type") || ""
+          if (contentType.includes("text/html")) continue
+          const json = await res.json()
+          if (active && json && typeof json === "object" && Object.keys(json).length > 0) {
+            setData(json)
+            return
+          }
+        } catch {}
+      }
+    }
+    load()
+    const timer = setInterval(load, 5000)
+    return () => {
+      active = false
+      clearInterval(timer)
+    }
+  }, [])
+
+  if (!data || Object.keys(data).length === 0) return null
+  const text = formatSensor(data)
+
+  return (
+    <span
+      className="tnum min-w-0 truncate text-xs text-muted-foreground"
+      title={text}
+    >
+      {text}
+    </span>
+  )
+}
+
 // Split out because recharts is most of this bundle and the list page draws no
 // chart. The landing page is 288 kB rather than 678 kB (95 kB gzipped against
 // 207 kB), with the rest fetched immediately after it paints.
@@ -173,9 +226,10 @@ export default function App() {
         <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-3 sm:px-6">
           {/* The site name is the way back to the list, so a node page needs
               no back button of its own. */}
-          <button className="font-semibold transition-opacity hover:opacity-70" onClick={() => go(null)}>
+          <button className="shrink-0 font-semibold transition-opacity hover:opacity-70" onClick={() => go(null)}>
             {me.site_name || "Monitor"}
           </button>
+          <SensorBar />
           <div className="flex-1" />
           {/* The panel is a separate app built into the hub, not part of this
               theme, so this is a navigation rather than a route. */}

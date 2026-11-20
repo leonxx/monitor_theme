@@ -1,0 +1,14 @@
+[Unit]
+Description=Sensor Data Webhook Receiver
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/monitor/sensor
+ExecStart=/usr/bin/python3 /opt/monitor/sensor/server.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

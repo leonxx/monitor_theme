@@ -20,6 +20,9 @@ export default defineConfig({
   // changeOrigin sends that hub its own name as Host, which the proxy or CDN in
   // front of it routes by.
   server: {
-    proxy: { "/api": { target: process.env.MONITOR_HUB || "http://127.0.0.1:9911", changeOrigin: true, ws: true } },
+    proxy: {
+      "/api": { target: process.env.MONITOR_HUB || "http://127.0.0.1:28080", changeOrigin: true, ws: true },
+      "/sensor": { target: "http://127.0.0.1:28088", changeOrigin: true },
+    },
   },
 })

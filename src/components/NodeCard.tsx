@@ -238,13 +238,25 @@ export function NodeCard({ node, onOpen, ping }: { node: Node; onOpen: () => voi
           {/* Live throughput, one quiet line aligned under the meters' two
               columns. The month's usage is on the 流量 bar above. */}
           <div className="tnum mt-3 grid grid-cols-2 gap-x-4 text-xs" title="此刻的网速">
-            <span className="inline-flex items-center gap-1.5">
-              <ArrowDown className="size-3 text-muted-foreground" />
-              {m ? rate(m.net_rx) : "—"}
+            <span className="inline-flex items-center gap-2 truncate">
+              <span className="inline-flex items-center gap-1">
+                <ArrowDown className="size-3 text-muted-foreground" />
+                {m ? rate(m.net_rx) : "—"}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <ArrowUp className="size-3 text-muted-foreground" />
+                {m ? rate(m.net_tx) : "—"}
+              </span>
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <ArrowUp className="size-3 text-muted-foreground" />
-              {m ? rate(m.net_tx) : "—"}
+            <span className="inline-flex items-center justify-end gap-2 truncate">
+              <span className="inline-flex items-center gap-1" title="TCP 连接数">
+                <span className="text-muted-foreground">TCP</span>
+                {m?.tcp ?? "—"}
+              </span>
+              <span className="inline-flex items-center gap-1" title="UDP 连接数">
+                <span className="text-muted-foreground">UDP</span>
+                {m?.udp ?? "—"}
+              </span>
             </span>
           </div>
 
